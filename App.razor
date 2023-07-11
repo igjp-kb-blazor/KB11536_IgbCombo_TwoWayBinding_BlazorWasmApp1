@@ -1,0 +1,64 @@
+﻿<div style="max-width:480px; margin:24px auto; display:flex; flex-direction:column; gap:24px;">
+
+    <div style="height:60px;">
+        <p>現在選択されている値 (_selectedValues フィールド変数の値)</p>
+        @foreach (var value in _selectedValues)
+        {
+            <div>@value - @(_data.First(item => item.Id == value).Name)</div>
+        }
+        @if (!_selectedValues.Any())
+        {
+            <div>(何も選択されていません)</div>
+        }
+    </div>
+
+    <div>
+        <p>モデル (_selectedValues フィールド変数) を変更</p>
+        <button @onclick="@(() => { this._selectedValues = new[] { "001" }; })">Taro を選択</button>
+        <button @onclick="@(() => { this._selectedValues = new[] { "002" }; })">Hanako を選択</button>
+        <button @onclick="@(() => { this._selectedValues = new[] { "001", "002" }; })">Taro と Hanako を選択</button>
+        <button @onclick="@(() => { this._selectedValues = Array.Empty<string>(); })">なにも選択しない</button>
+    </div>
+
+    <div>
+        <p>IgbCombo コンポーネント</p>
+        @*
+        IgbCombo で双方向データバインディングを行うには以下の要領で実装します。
+        - モデルから UI へのデータバインディングのために、Value パラメータに選択状態を渡します。
+        - UI からモデルへのデータバインディングのために、Change イベントハンドラを補足して選択状態の変化を取得します。
+        *@
+        <IgbCombo Data="_data" DisplayKey="@nameof(Person.Name)" ValueKey="@nameof(Person.Id)" Value="_selectedValues" Change="OnChange">
+        </IgbCombo>
+    </div>
+
+</div>
+
+@code
+{
+    //// <summary>
+    /// このサンプルで IgbCombo の選択肢とするサンプルデータです。
+    /// </summary>
+    private readonly IEnumerable<Person> _data = new Person[]
+    {
+        new(){ Id = "001", Name = "Taro" },
+        new(){ Id = "002", Name = "Hanako" },
+    };
+
+    /// <summary>
+    /// 選択されたアイテムの ValueKey 値 (このサンプルでは Id プロパティ) を保持する配列フィールド変数です。<br/>
+    /// このサンプルでは、この _selectedValues フィールド変数を IgbCombo コンポーネントに双方向データバインディングします。<br/>
+    /// ページ表示時点の初期表示から所定のアイテムを選択済みにしておきたい場合は、それらアイテムの ValueKey 値を、
+    /// OnInitialized などのタイミングで指定しておけばよいです。
+    /// </summary>
+    private string[] _selectedValues = Array.Empty<string>();
+
+    /// <summary>
+    /// IgbCombo でアイテムの選択状態が変更されたときに呼び出されるメソッドです。<br/>
+    /// このサンプルでは双方向データバインディングを実現するため、イベント引数で知らされる選択されたアイテムの ValueKey 値を
+    /// _selectedValues フィールド変数に格納します。
+    /// </summary>
+    private void OnChange(IgbComboChangeEventArgs e)
+    {
+        _selectedValues = e.Detail.NewValue;
+    }
+}
